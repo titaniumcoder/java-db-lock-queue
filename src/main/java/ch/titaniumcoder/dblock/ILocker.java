@@ -6,5 +6,4 @@ package ch.titaniumcoder.dblock;
  */
 public interface ILocker {
     Lock lock(String id);
-    void unlock(Lock id);
 }

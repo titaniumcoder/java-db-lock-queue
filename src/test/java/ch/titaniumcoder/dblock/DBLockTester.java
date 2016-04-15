@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.postgresql.ds.PGPoolingDataSource;
 
-import java.sql.SQLException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -34,10 +33,6 @@ public class DBLockTester {
 
     @Test
     public void theOneTest() throws Exception {
-        DatabaseLocker lock1 = new DatabaseLocker(dataSource, "");
-        DatabaseLocker lock2 = new DatabaseLocker(dataSource, "");
-        DatabaseLocker lock3 = new DatabaseLocker(dataSource, "");
-
         Runnable t1 = () -> {
             lockIt("ABC", 5000);
             System.out.println("Finished t1");

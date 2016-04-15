@@ -1,17 +1,15 @@
 package ch.titaniumcoder.dblock;
 
 import javax.sql.DataSource;
-import java.sql.*;
-import java.util.UUID;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.logging.Logger;
 
 /**
  * Just a common locker class
  */
 public class DatabaseLocker implements ILocker {
-    public static final String SQL_INSERT = "INSERT INTO businessobjectlock (uuid,id,locked_ts) VALUES (?,?,?)";
-    public static final String SQL_DELETE = "DELETE FROM businessobjectlock WHERE uuid=?";
-
     private final static Logger LOGGER = Logger.getLogger(DatabaseLocker.class.getName());
 
     private final DataSource dataSource;
@@ -62,50 +60,11 @@ public class DatabaseLocker implements ILocker {
         }
     }
 
-    protected Connection getConnection() throws SQLException {
-        Connection c = dataSource.getConnection();
-        c.setAutoCommit(false);
-        return c;
-    }
-
     @Override
     public Lock lock(String id) {
-        String uuid = generateUUID();
-
-        try (Connection c = getConnection(); PreparedStatement ps = c.prepareStatement(SQL_INSERT)) {
-            ps.setString(1, uuid);
-            ps.setString(2, id);
-            ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-            int ins = ps.executeUpdate();
-            LOGGER.fine("Executed insert: " + ins);
-        } catch (SQLException e) {
-            throw new LockerException(e);
-        }
-
-        // something went wrong
-        return new Lock(this, uuid, id);
+        Lock lock = new Lock(dataSource, schema, id);
+        lock.lock();
+        return lock;
     }
 
-    @Override
-    public void unlock(Lock lock) {
-        try (Connection c = getConnection(); PreparedStatement ps = c.prepareStatement(SQL_DELETE)) {
-            ps.setString(1, lock.getUuid());
-            int del = ps.executeUpdate();
-            LOGGER.fine("Executed deletion: " + del);
-        } catch (SQLException e) {
-            throw new LockerException(e);
-        }
-    }
-
-    public static String generateUUID() {
-        char[] chars = new char[32];
-        UUID uuid = UUID.randomUUID();
-        String s = uuid.toString();
-        s.getChars(0, 8, chars, 0);
-        s.getChars(9, 13, chars, 8);
-        s.getChars(14, 18, chars, 12);
-        s.getChars(19, 23, chars, 16);
-        s.getChars(24, 36, chars, 20);
-        return new String(chars);
-    }
 }
