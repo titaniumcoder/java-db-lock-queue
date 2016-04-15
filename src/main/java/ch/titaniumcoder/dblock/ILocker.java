@@ -5,6 +5,6 @@ package ch.titaniumcoder.dblock;
  * There are in principles only two methods: lock and unlock.
  */
 public interface ILocker {
-    boolean lock(String id);
-    void unlock(String id);
+    Lock lock(String id);
+    void unlock(Lock id);
 }
