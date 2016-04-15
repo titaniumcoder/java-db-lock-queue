@@ -32,8 +32,8 @@ public class DatabaseLocker implements AutoCloseable, ILocker {
 
     }
 
-    protected String getSchema() {
-        if (schema == null)
+    public String getSchema() {
+        if (schema == null || "".equals(schema.trim()))
             return "";
         else
             return schema + ".";
